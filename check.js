@@ -67,17 +67,17 @@ async function main(){
     const announced = (await getJSON('ilmoitetut')) || {};
     const uusiPaiva = winners.find(w => !announced[w.key]);
     await sendWebhook(AIKATAULU_WEBHOOK,
-      `LISTEN LISTEN LISTEN! Mi swear pon Jah, *${lastEditor}* kävi taas tekemässä merkintöjä to DE CALENDAR!\nMahdollisia pelipäiviä: ${total}\n\n${listText}`);
+      `*${lastEditor} kävi tekemässä merkintöjä kalenteriin!\nMahdollisia pelipäiviä: ${total}\n\n${listText}\n\nNyt näyttää siltä, että saadaan yhteinen pelipäivä!*\n\n${CALENDAR_LINK}`);
     if(uusiPaiva){
-      await sendWebhook(ANNOUNCE_WEBHOOK, `Huomio huomio meillä on yhteinen pelipäivä! Clench your butcheeks and hold your Neurallinks....KOHTA MENNÄÄN!\n${CALENDAR_LINK}`);
+      await sendWebhook(ANNOUNCE_WEBHOOK, `Huomio huomio meillä on yhteinen pelipäivä! Clench your butcheeks and hold your Neurallinks....KOHTA MENNÄÄN!\n\n${CALENDAR_LINK}`);
       await putJSON(`ilmoitetut/${uusiPaiva.key}`, true);
     }
   } else if(maxCount === 5){
     await sendWebhook(AIKATAULU_WEBHOOK,
-      `BOMBOCLAAAT! *${lastEditor}* kävi tekemässä merkintöjä to DE CALENDAR, mi seh!\nMahdollisia pelipäiviä: ${total}\n\n${listText}\n\nR WI GONNA PELAA SOON, RASTA?`);
+      `*${lastEditor} kävi tekemässä merkintöjä kalenteriin!\nMahdollisia pelipäiviä: ${total}\n\n${listText}\n\nPäästäänkö me kohta pelaamaan?*\n\n${CALENDAR_LINK}`);
   } else {
     await sendWebhook(AIKATAULU_WEBHOOK,
-      `MASSIIVE NEWS, seen? *${lastEditor}* kävi tekemässä merkintöjä to DE CALENDAR!\nMahdollisia pelipäiviä: ${total}\n\n${listText}`);
+      `*${lastEditor} kävi tekemässä merkintöjä kalenteriin!\nMahdollisia pelipäiviä: ${total}\n\n${listText}*\n\n${CALENDAR_LINK}`);
   }
 
   await putJSON('meta/last_notified_edit_time', lastEditTime);
