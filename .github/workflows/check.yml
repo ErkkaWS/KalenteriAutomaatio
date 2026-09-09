@@ -2,7 +2,7 @@ name: Kalenterin tarkistus
 
 on:
   schedule:
-    - cron: '*/2 * * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 jobs:
