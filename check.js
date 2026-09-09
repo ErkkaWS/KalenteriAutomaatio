@@ -1,6 +1,5 @@
 const FIREBASE_URL = 'https://cyberpunk-2080-calendar-default-rtdb.europe-west1.firebasedatabase.app';
-//const COOLDOWN_MS = 20 * 60 * 1000;
-const COOLDOWN_MS = 0
+const COOLDOWN_MS = 0;
 const CALENDAR_LINK = 'https://cyberpunk2080phantomstatic.netlify.app/';
 
 const AIKATAULU_WEBHOOK = process.env.DISCORD_WEBHOOK_AIKATAULU;
