@@ -105,6 +105,7 @@ async function tarkistaMuistutus(maxCount, data){
 }
 
 async function main(){
+  console.log('VERSIO: 2026-09-09-v4 (lähimmät päivät + tyhjän listan korjaus)');
   const data = (await getJSON('data')) || {};
   const { counted, total, listText, maxCount } = laskePaivat(data);
 
