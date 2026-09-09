@@ -41,11 +41,14 @@ async function main(){
   }
 
   const data = (await getJSON('data')) || {};
+  const todayKey = new Date().toISOString().slice(0, 10); // YYYY-MM-DD, tänään
 
-  const counted = Object.keys(data).map(key => ({
-    key,
-    count: Object.values(data[key]).filter(status => status === 'vapaa').length
-  })).filter(d => d.count > 0);
+  const counted = Object.keys(data)
+    .filter(key => key >= todayKey) // jätä menneet päivät pois laskennasta
+    .map(key => ({
+      key,
+      count: Object.values(data[key]).filter(status => status === 'vapaa').length
+    })).filter(d => d.count > 0);
 
   counted.sort((a, b) => b.count - a.count);
   const total = counted.length;
