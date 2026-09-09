@@ -1,5 +1,5 @@
 const FIREBASE_URL = 'https://cyberpunk-2080-calendar-default-rtdb.europe-west1.firebasedatabase.app';
-const COOLDOWN_MS = 20 * 60 * 1000;
+const COOLDOWN_MS = 0;//20 * 60 * 1000
 const REMINDER_INTERVAL_MS = 3 * 24 * 60 * 60 * 1000; // 3 päivää
 const CALENDAR_LINK = 'https://cyberpunk2080phantomstatic.netlify.app/';
 
