@@ -1,5 +1,6 @@
 const FIREBASE_URL = 'https://cyberpunk-2080-calendar-default-rtdb.europe-west1.firebasedatabase.app';
-const COOLDOWN_MS = 0;
+const COOLDOWN_MS = 20 * 60 * 1000;
+const REMINDER_INTERVAL_MS = 3 * 24 * 60 * 60 * 1000; // 3 päivää
 const CALENDAR_LINK = 'https://cyberpunk2080phantomstatic.netlify.app/';
 
 const AIKATAULU_WEBHOOK = process.env.DISCORD_WEBHOOK_AIKATAULU;
@@ -32,7 +33,58 @@ async function sendWebhook(url, content){
   }
 }
 
+function laskePaivat(data){
+  const todayKey = new Date().toISOString().slice(0, 10); // YYYY-MM-DD, tänään
+  const counted = Object.keys(data)
+    .filter(key => key >= todayKey) // jätä menneet päivät pois laskennasta
+    .map(key => ({
+      key,
+      count: Object.values(data[key]).filter(status => status === 'vapaa').length
+    })).filter(d => d.count > 0);
+
+  counted.sort((a, b) => b.count - a.count);
+  const total = counted.length;
+  const listText = counted.slice(0, 10).map(d => `${formatDate(d.key)} — ${d.count} pelaajaa`).join('\n');
+  const maxCount = counted.length ? counted[0].count : 0;
+  return { counted, total, listText, maxCount };
+}
+
+async function tarkistaMuistutus(maxCount){
+  if(maxCount >= 6){
+    console.log('Muistutusta ei tarvita, sopiva päivä on jo löytynyt.');
+    return;
+  }
+
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const announced = (await getJSON('ilmoitetut')) || {};
+  const menneetPelatut = Object.keys(announced).filter(key => key < todayKey).sort();
+
+  if(menneetPelatut.length){
+    const viimeisinPelattu = menneetPelatut[menneetPelatut.length - 1];
+    const paiviaSitten = (Date.now() - new Date(viimeisinPelattu + 'T00:00:00Z').getTime()) / (24 * 60 * 60 * 1000);
+    if(paiviaSitten < 3){
+      console.log(`Edellisestä pelipäivästä (${viimeisinPelattu}) alle 3 päivää, ei muistuteta vielä.`);
+      return;
+    }
+  }
+
+  const lastReminder = await getJSON('meta/last_reminder_time');
+  const now = Date.now();
+  if(!lastReminder || (now - lastReminder) >= REMINDER_INTERVAL_MS){
+    await sendWebhook(AIKATAULU_WEBHOOK,
+      `*Muistutus: käykää merkitsemässä oma saatavuutenne kalenteriin, jotta löydetään yhteinen pelipäivä!*\n\n${CALENDAR_LINK}`);
+    await putJSON('meta/last_reminder_time', now);
+  } else {
+    console.log(`Muistutuksesta on ${Math.round((now-lastReminder)/1000/60/60)}h, ei vielä 72h.`);
+  }
+}
+
 async function main(){
+  const data = (await getJSON('data')) || {};
+  const { counted, total, listText, maxCount } = laskePaivat(data);
+
+  await tarkistaMuistutus(maxCount);
+
   const lastEditTime = await getJSON('meta/last_edit_time');
   const lastEditor = await getJSON('meta/last_editor');
   const lastNotified = await getJSON('meta/last_notified_edit_time');
@@ -46,21 +98,6 @@ async function main(){
     return;
   }
 
-  const data = (await getJSON('data')) || {};
-  const todayKey = new Date().toISOString().slice(0, 10); // YYYY-MM-DD, tänään
-
-  const counted = Object.keys(data)
-    .filter(key => key >= todayKey) // jätä menneet päivät pois laskennasta
-    .map(key => ({
-      key,
-      count: Object.values(data[key]).filter(status => status === 'vapaa').length
-    })).filter(d => d.count > 0);
-
-  counted.sort((a, b) => b.count - a.count);
-  const total = counted.length;
-  const top10 = counted.slice(0, 10);
-  const listText = top10.map(d => `${formatDate(d.key)} — ${d.count} pelaajaa`).join('\n');
-  const maxCount = counted.length ? counted[0].count : 0;
   const winners = counted.filter(d => d.count === maxCount && maxCount >= 6);
 
   if(maxCount >= 6){
