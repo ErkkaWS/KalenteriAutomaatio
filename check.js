@@ -1,5 +1,5 @@
 const FIREBASE_URL = 'https://cyberpunk-2080-calendar-default-rtdb.europe-west1.firebasedatabase.app';
-const COOLDOWN_MS = 0;//20 * 60 * 1000;
+const COOLDOWN_MS = 20 * 60 * 1000;
 const REMINDER_INTERVAL_MS = 3 * 24 * 60 * 60 * 1000; // 3 päivää
 const CALENDAR_LINK = 'https://cyberpunk2080phantomstatic.netlify.app/';
 
@@ -45,21 +45,21 @@ function lahimmatPaivat(data, vahintaanVapaana){
     })
     .filter(d => d.count >= vahintaanVapaana && d.varattuCount === 0);
 
-  paivat.sort((a, b) => a.key.localeCompare(b.key)); // lähimmät (aikaisin päivämäärä) ensin
+  paivat.sort((a, b) => a.key.localeCompare(b.key));
   return paivat.slice(0, 3);
 }
 
 function laskePaivat(data){
-  const todayKey = new Date().toISOString().slice(0, 10); // YYYY-MM-DD, tänään
+  const todayKey = new Date().toISOString().slice(0, 10);
   const counted = Object.keys(data)
-    .filter(key => key >= todayKey) // jätä menneet päivät pois laskennasta
+    .filter(key => key >= todayKey)
     .map(key => {
       const entries = Object.values(data[key]);
       const vapaaCount = entries.filter(status => status === 'vapaa').length;
       const varattuCount = entries.filter(status => status === 'varattu').length;
       return { key, count: vapaaCount, varattuCount };
     })
-    .filter(d => d.count >= 4 && d.varattuCount === 0); // vähintään 4 vapaana, ei yhtään varattua
+    .filter(d => d.count >= 4 && d.varattuCount === 0);
 
   counted.sort((a, b) => b.count - a.count);
   const total = counted.length;
