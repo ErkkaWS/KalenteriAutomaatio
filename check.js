@@ -18,12 +18,18 @@ async function putJSON(path, value){
   await fetch(`${FIREBASE_URL}/${path}.json`, { method: 'PUT', body: JSON.stringify(value) });
 }
 async function sendWebhook(url, content){
-  if(!url) return;
-  await fetch(url, {
+  if(!url){ console.log('VIRHE: webhook-URL puuttuu (secret on tyhjä tai nimi väärin kytketty).'); return; }
+  const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ content })
   });
+  if(!res.ok){
+    const text = await res.text();
+    console.log(`VIRHE: Discord hylkäsi viestin. Status ${res.status}: ${text}`);
+  } else {
+    console.log('Webhook lähetetty onnistuneesti.');
+  }
 }
 
 async function main(){
