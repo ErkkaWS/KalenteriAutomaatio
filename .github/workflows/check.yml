@@ -15,6 +15,6 @@ jobs:
           node-version: 20
       - name: Aja tarkistusskripti
         env:
-          DISCORD_WEBHOOK_AIKATAULU: ${{ secrets.DISCORD_WEBHOOK_AIKATAULU__KANAVA_ILMOITUKSET }}
-          DISCORD_WEBHOOK_ANNOUNCE: ${{ secrets.DISCORD_WEBHOOK_ANNOUNCEMENT__KANAVA_ILMOITUS }}
+          DISCORD_WEBHOOK_AIKATAULU: ${{ secrets.DISCORD_WEBHOOK_AIKATAULU_KANAVA_ILMOITUKSET }}
+          DISCORD_WEBHOOK_ANNOUNCE: ${{ secrets.DISCORD_WEBHOOK_ANNOUNCEMENT_KANAVA_ILMOITUS }}
         run: node check.js
