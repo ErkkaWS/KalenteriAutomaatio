@@ -63,7 +63,8 @@ function laskePaivat(data){
 
   counted.sort((a, b) => b.count - a.count);
   const total = counted.length;
-  const listText = counted.slice(0, 10).map(d => `${formatDate(d.key)} — ${d.count} pelaajaa`).join('\n');
+  const listText = counted.slice(0, 10).map(d => `${formatDate(d.key)} — ${d.count} pelaajaa`).join('\n')
+    || 'Ei vielä yhtään sopivaa päivää.';
   const maxCount = counted.length ? counted[0].count : 0;
   return { counted, total, listText, maxCount };
 }
@@ -119,6 +120,12 @@ async function main(){
   const elapsed = Date.now() - lastEditTime;
   if(elapsed < COOLDOWN_MS){
     console.log(`Cooldown kesken (${Math.round(elapsed/1000)}s / ${COOLDOWN_MS/1000}s).`);
+    return;
+  }
+
+  if(Object.keys(data).length === 0){
+    console.log('Kalenterissa ei ole yhtään merkintää, ei lähetetä recapia.');
+    await putJSON('meta/last_notified_edit_time', lastEditTime);
     return;
   }
 
