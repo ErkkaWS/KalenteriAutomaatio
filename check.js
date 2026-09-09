@@ -6,7 +6,7 @@ const FIREBASE_URL = 'https://cyberpunk-2080-calendar-default-rtdb.europe-west1.
 const CALENDAR_LINK = 'https://cyberpunk2080phantomstatic.netlify.app/';
 
 const COOLDOWN_MS = 10 * 60 * 1000;              // 10 min viimeisimmästä muokkauksesta ennen recapia
-const REMINDER_INTERVAL_MS = 0;//3 * 24 * 60 * 60 * 1000; // 3 päivää muistutusten välissä
+const REMINDER_INTERVAL_MS = 1 * 60 * 60 * 1000; // TESTAUS (yön yli) — muista palauttaa: 3 * 24 * 60 * 60 * 1000
 const GRACE_PERIOD_MS = 3 * 24 * 60 * 60 * 1000;       // 3 päivän hiljaisuus pelatun päivän jälkeen
 const MIN_VAPAA_RECAP = 4;                       // recapin "mahdollinen pelipäivä" -kynnys
 
