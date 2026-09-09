@@ -33,6 +33,22 @@ async function sendWebhook(url, content){
   }
 }
 
+function lahimmatPaivat(data, vahintaanVapaana){
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const paivat = Object.keys(data)
+    .filter(key => key >= todayKey)
+    .map(key => {
+      const entries = Object.values(data[key]);
+      const vapaaCount = entries.filter(status => status === 'vapaa').length;
+      const varattuCount = entries.filter(status => status === 'varattu').length;
+      return { key, count: vapaaCount, varattuCount };
+    })
+    .filter(d => d.count >= vahintaanVapaana && d.varattuCount === 0);
+
+  paivat.sort((a, b) => a.key.localeCompare(b.key)); // lähimmät (aikaisin päivämäärä) ensin
+  return paivat.slice(0, 3);
+}
+
 function laskePaivat(data){
   const todayKey = new Date().toISOString().slice(0, 10); // YYYY-MM-DD, tänään
   const counted = Object.keys(data)
@@ -52,7 +68,7 @@ function laskePaivat(data){
   return { counted, total, listText, maxCount };
 }
 
-async function tarkistaMuistutus(maxCount){
+async function tarkistaMuistutus(maxCount, data){
   if(maxCount >= 6){
     console.log('Muistutusta ei tarvita, sopiva päivä on jo löytynyt.');
     return;
@@ -74,8 +90,13 @@ async function tarkistaMuistutus(maxCount){
   const lastReminder = await getJSON('meta/last_reminder_time');
   const now = Date.now();
   if(!lastReminder || (now - lastReminder) >= REMINDER_INTERVAL_MS){
-    await sendWebhook(AIKATAULU_WEBHOOK,
-      `*Muistutus: käykää merkitsemässä oma saatavuutenne kalenteriin, jotta löydetään yhteinen pelipäivä!*\n\n${CALENDAR_LINK}`);
+    let viesti = 'Muistutus: käykää merkitsemässä oma saatavuutenne kalenteriin, jotta löydetään yhteinen pelipäivä!';
+    const lahimmat = lahimmatPaivat(data, 2);
+    if(lahimmat.length){
+      const lista = lahimmat.map(d => `${formatDate(d.key)} — ${d.count} pelaajaa`).join('\n');
+      viesti += `\n\nLähimmät mahdolliset päivät:\n${lista}`;
+    }
+    await sendWebhook(AIKATAULU_WEBHOOK, `*${viesti}*\n\n${CALENDAR_LINK}`);
     await putJSON('meta/last_reminder_time', now);
   } else {
     console.log(`Muistutuksesta on ${Math.round((now-lastReminder)/1000/60/60)}h, ei vielä 72h.`);
@@ -86,7 +107,7 @@ async function main(){
   const data = (await getJSON('data')) || {};
   const { counted, total, listText, maxCount } = laskePaivat(data);
 
-  await tarkistaMuistutus(maxCount);
+  await tarkistaMuistutus(maxCount, data);
 
   const lastEditTime = await getJSON('meta/last_edit_time');
   const lastEditor = await getJSON('meta/last_editor');
