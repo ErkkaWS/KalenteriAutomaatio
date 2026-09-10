@@ -1,0 +1,9 @@
+# Salaisuudet — älä koskaan committaa täytettyä versiota
+secrets.env
+
+# Paikallinen lokitiedosto
+loki.txt
+
+# Python
+__pycache__/
+*.pyc
